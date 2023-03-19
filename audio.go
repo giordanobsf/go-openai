@@ -19,6 +19,7 @@ const (
 type AudioRequest struct {
 	Model    string
 	FilePath string
+	File     *multipart.File
 }
 
 // AudioResponse represents a response structure for audio API.
@@ -56,6 +57,7 @@ func (c *Client) callAudioAPI(
 	if err = audioMultipartForm(request, w); err != nil {
 		return
 	}
+	
 
 	urlSuffix := fmt.Sprintf("/audio/%s", endpointSuffix)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), &formBody)
@@ -71,27 +73,33 @@ func (c *Client) callAudioAPI(
 // audioMultipartForm creates a form with audio file contents and the name of the model to use for
 // audio processing.
 func audioMultipartForm(request AudioRequest, w *multipart.Writer) error {
-	f, err := os.Open(request.FilePath)
-	if err != nil {
-		return fmt.Errorf("opening audio file: %w", err)
-	}
-
-	fw, err := w.CreateFormFile("file", f.Name())
+	fw, err := w.CreateFormFile("file", request.FilePath)
 	if err != nil {
 		return fmt.Errorf("creating form file: %w", err)
 	}
 
-	if _, err = io.Copy(fw, f); err != nil {
-		return fmt.Errorf("reading from opened audio file: %w", err)
+	if request.File == nil {
+		f, err := os.Open(request.FilePath)
+		if err != nil {
+			return fmt.Errorf("opening audio file: %w", err)
+		}
+
+		if _, err = io.Copy(fw, f); err != nil {
+			return fmt.Errorf("reading from opened audio file: %w", err)
+		}
+	} else {
+		if _, err = io.Copy(fw, *request.File); err != nil {
+			return fmt.Errorf("reading from opened audio file: %w", err)
+		}
 	}
 
 	fw, err = w.CreateFormField("model")
 	if err != nil {
 		return fmt.Errorf("creating form field: %w", err)
 	}
-
+	
 	modelName := bytes.NewReader([]byte(request.Model))
-	if _, err = io.Copy(fw, modelName); err != nil {
+	if _, err := io.Copy(fw, modelName); err != nil {
 		return fmt.Errorf("writing model name: %w", err)
 	}
 	w.Close()

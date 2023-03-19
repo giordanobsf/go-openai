@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test"
+	. "github.com/giordanobsf/go-openai"
+	"github.com/giordanobsf/go-openai/internal/test"
 
 	"context"
 	"testing"

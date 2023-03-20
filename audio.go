@@ -18,8 +18,8 @@ const (
 // AudioRequest represents a request structure for audio API.
 // ResponseFormat is not supported for now. We only return JSON text, which may be sufficient.
 type AudioRequest struct {
-	Model    string
-	FilePath string
+	Model       string
+	FilePath    string
 	File     *multipart.File
 	Prompt      string // For translation, it should be in English
 	Temperature float32

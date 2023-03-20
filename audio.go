@@ -57,7 +57,6 @@ func (c *Client) callAudioAPI(
 	if err = audioMultipartForm(request, w); err != nil {
 		return
 	}
-	
 
 	urlSuffix := fmt.Sprintf("/audio/%s", endpointSuffix)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), &formBody)
